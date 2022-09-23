@@ -11,3 +11,4 @@ npc/build
 !.gitignore
 !init.sh
 /nvboard
+/fceux-am
