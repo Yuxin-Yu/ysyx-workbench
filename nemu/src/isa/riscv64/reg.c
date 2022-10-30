@@ -24,6 +24,23 @@ const char *regs[] = {
 };
 
 void isa_reg_display() {
+  printf("***************************RISCV64 REG INFO***************************\n");
+  printf("PC:0x%lx \n",cpu.pc);
+  int i,j;
+  printf("----------------------------------------------------------------------\n");
+  for(i=0;i<32;i=i+8){
+    for(j=0;j<8;j++){
+      printf("%3s:%10lx | ",regs[i+j],cpu.gpr[i+j]);
+    }
+    printf("\n");
+  }
+  // printf("***************************FPR***************************\n");
+  // for(i=0;i<32;i=i+8){
+  //   for(j=0;j<8;j++){
+  //     printf("%s:%lx | ",regs[i+j],cpu.fpr[i+j]);
+  //   }
+  //   printf("\n");
+  // }
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {

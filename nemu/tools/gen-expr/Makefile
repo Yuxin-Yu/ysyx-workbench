@@ -15,4 +15,13 @@
 
 NAME = gen-expr
 SRCS = gen-expr.c
+NUM = 100
+
 include $(NEMU_HOME)/scripts/build.mk
+
+.PHONY:all
+
+all: $(SRCS)
+	gcc gen-expr.c -o $(NAME)
+	@echo "Generate $(NAME) line expression to input"
+	./$(NAME) $(NUM) > input

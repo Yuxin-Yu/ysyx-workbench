@@ -19,6 +19,7 @@
 #include <time.h>
 #include <assert.h>
 #include <string.h>
+#include <stdbool.h>
 
 // this should be enough
 static char buf[65536] = {};
@@ -30,9 +31,44 @@ static char *code_format =
 "  printf(\"%%u\", result); "
 "  return 0; "
 "}";
+static uint32_t buf_index=0;
 
+static void gen_num(){
+  uint32_t val;
+  val = rand()%100+1; //1-100
+  if(val>99){
+    buf[buf_index++] = (char)((val/100)+0x30);
+  }
+  else if(val >9 && val<=99){
+    buf[buf_index++] = (char)((val/10)+0x30);
+    buf[buf_index++] = (char)((val%10)+0x30);
+  }
+  else {
+    buf[buf_index++] = (char)((val%10)+0x30);
+  }
+}
+static void gen(char input){
+  buf[buf_index++] = input;
+}
+static void gen_rand_op() {
+  if(buf_index < 65536){
+    switch (rand()%4) {
+      case 0: buf[buf_index++]='+';break;
+      case 1: buf[buf_index++]='-'; break;
+      case 2: buf[buf_index++]='*'; break;
+      case 3: buf[buf_index++]='/'; break;
+      default: break;
+    } 
+  }
+  
+}
 static void gen_rand_expr() {
-  buf[0] = '\0';
+  
+  switch (rand()%3) {
+    case 0: gen_num();break;
+    case 1: gen('('); gen_rand_expr(); gen(')'); break;
+    default: gen_rand_expr(); gen_rand_op(); gen_rand_expr(); break;
+  }
 }
 
 int main(int argc, char *argv[]) {
@@ -42,9 +78,16 @@ int main(int argc, char *argv[]) {
   if (argc > 1) {
     sscanf(argv[1], "%d", &loop);
   }
-  int i;
+  int i,j;
   for (i = 0; i < loop; i ++) {
+    for(j=0;j<65536;j++){buf[j]=NULL;}
+
+    buf[0] = '(';
+    buf_index = 1;
     gen_rand_expr();
+    buf[buf_index] = ')';
+
+    if(buf_index > 31){continue;}
 
     sprintf(code_buf, code_format, buf);
 
@@ -53,17 +96,18 @@ int main(int argc, char *argv[]) {
     fputs(code_buf, fp);
     fclose(fp);
 
-    int ret = system("gcc /tmp/.code.c -o /tmp/.expr");
+    int ret = system("gcc -Werror /tmp/.code.c -o /tmp/.expr");
+    // int ret = system("gcc /tmp/.code.c -o /tmp/.expr");
     if (ret != 0) continue;
 
     fp = popen("/tmp/.expr", "r");
     assert(fp != NULL);
 
-    int result;
-    fscanf(fp, "%d", &result);
+    unsigned result;
+    fscanf(fp, "%u", &result);
     pclose(fp);
 
-    printf("%u %s\n", result, buf);
+    printf("%u %s \n", result, buf);
   }
   return 0;
 }
