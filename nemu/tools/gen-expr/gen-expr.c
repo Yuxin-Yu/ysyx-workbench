@@ -62,12 +62,18 @@ static void gen_rand_op() {
   }
   
 }
+bool flag_op = false;
 static void gen_rand_expr() {
   
   switch (rand()%3) {
     case 0: gen_num();break;
     case 1: gen('('); gen_rand_expr(); gen(')'); break;
-    default: gen_rand_expr(); gen_rand_op(); gen_rand_expr(); break;
+    default:
+      gen_rand_expr(); 
+      gen_rand_op(); 
+      gen_rand_expr(); 
+      flag_op = true;
+      break;
   }
 }
 
@@ -84,10 +90,11 @@ int main(int argc, char *argv[]) {
 
     buf[0] = '(';
     buf_index = 1;
+    flag_op = false;
     gen_rand_expr();
     buf[buf_index] = ')';
 
-    if(buf_index > 31){continue;}
+    if(buf_index > 31 || flag_op==false){continue;}
 
     sprintf(code_buf, code_format, buf);
 

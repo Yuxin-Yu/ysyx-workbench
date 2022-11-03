@@ -78,20 +78,28 @@ static void expr_test(){
   char *cal_ptr = NULL;
   bool* success;
   char* expr_ptr;
-  word_t cnt = 0;
+  word_t cnt = 0 ,cnt_success=0;
 
   while((line_ch_size = get_line(&str_line,&buff_size,fp)) != 0){
-      // printf("缓冲区大小：%d\n",buff_size);
-      // printf("行字符数：%d\n",line_ch_size);
-      // printf("行字符串：%s\n",str_line);
-      printf("Start Check %ld Line  \n",++cnt);
-      char* expr_ptr = strtok(str_line," ");
-      expr_value = (word_t)atoi(expr_ptr);
-      cal_ptr = expr_ptr + strlen(expr_ptr) + 1;
-      cal_value = expr(cal_ptr,&success);
-      
+    // printf("缓冲区大小：%d\n",buff_size);
+    // printf("行字符数：%d\n",line_ch_size);
+    // printf("行字符串：%s\n",str_line);
+    // printf("Start Check %ld Line  \n",++cnt);
+    char* expr_ptr = strtok(str_line," ");
+    expr_value = (word_t)atoi(expr_ptr);
+    cal_ptr = expr_ptr + strlen(expr_ptr) + 1;
+    cal_value = expr(cal_ptr,&success);
+    cnt++;
+    
+    if(cal_value == expr_value){
+        cnt_success++;
+        printf("Success Line:%ld,Expr Value:%ld,Cal Value:%ld \n",cnt,expr_value,cal_value);
+    }else{
+      printf("Failed Line:%ld,Expr Value:%ld,Cal Value:%ld \n",cnt,expr_value,cal_value);
+    }
   }
   get_line_free(&str_line);
+  printf("Test:%ld,success:%ld \n",cnt,cnt_success);
 }
 
 int main(int argc, char *argv[]) {

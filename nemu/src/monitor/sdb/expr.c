@@ -94,11 +94,14 @@ static void display_token(){
   
 }
 static void clear_token(){
-  int i;
+  int i,j;
   // printf("Clear token .\n");
   for(i=0;i<32;i=i+1){
     tokens[i].type=0;
-    strcpy(tokens[i].str,"");
+    // strcpy(tokens[i].str,"");
+    for(j=0;j<32;j++){
+      tokens[i].str[j]=NULL;
+    }
   }
 }
 static bool make_token(char *e) {
@@ -159,7 +162,7 @@ static bool make_token(char *e) {
       return false;
     }
   }
-  // display_token();
+  //  display_token();
   
   return true;
 }
@@ -173,8 +176,10 @@ word_t expr(char *e, bool *success) {
 
   /* TODO: Insert codes to evaluate the expression. */
   //TODO();
+  word_t result = eval(0,nr_token-1);
+  clear_token();
   // printf("Express Vale:%d \n",eval(0,nr_token-1));
-  return eval(0,nr_token-1);
+  return result;
 
 }
 static bool check_parentheses(int start_index, int end_index){
@@ -207,17 +212,22 @@ static bool check_parentheses(int start_index, int end_index){
 }
 
 static word_t get_main_cal(int p,int q){
-  int i;
-  bool parenthese_flag=false;
+  int i,j=0;
   word_t position = 0;
   for(i=p;i<=q;i++){
-    if(tokens[i].type == TK_BRA_L){ parenthese_flag = true;}
-    else if(tokens[i].type == TK_BRA_R){parenthese_flag = false;}
-    if((tokens[i].type==TK_ADD || tokens[i].type==TK_SUB) && parenthese_flag==false){  //当运算符为"+"或"-”,且不在括号中
+    if(tokens[i].type == TK_BRA_L){ j++;}
+    else if(tokens[i].type == TK_BRA_R){j--;}
+
+    if((tokens[i].type==TK_ADD || tokens[i].type==TK_SUB) && j == 0){  //当运算符为"+"或"-”,且不在括号中
       position = i;
-    }else if((tokens[i].type==TK_MUL || tokens[i].type==TK_DIV) && parenthese_flag==false && position==0){//当运算符为"*"或"/”,不在括号中，且没有加减符号出现过
+    }else if((tokens[i].type==TK_MUL || tokens[i].type==TK_DIV) && j == 0 && position==0){//当运算符为"*"或"/”,不在括号中，且没有加减符号出现过
       position = i;
     }
+  }
+  if(position <=p || position >= q){
+    printf("Failed to get primary operator. \n");
+    printf("Position:%d,Character:%s. \n",position,tokens[position].str);
+    assert(0);
   }
   return position;
 }
@@ -251,11 +261,12 @@ static word_t eval(int p,int q){
     val1 = eval(p, op - 1);
     val2 = eval(op + 1, q);
    
+   word_t sub_result = 0;
     switch (tokens[op].str[0]) {
       case '+': return val1 + val2;
       case '-': return val1 - val2;
       case '*': return val1 * val2;
-      case '/': return val1 / val2;
+      case '/': return (word_t)(val1 / val2);
       default: assert(0);
     }
   }
